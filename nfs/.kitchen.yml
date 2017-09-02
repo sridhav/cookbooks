@@ -1,0 +1,48 @@
+---
+driver:
+  name: vagrant
+
+provisioner:
+  name: chef_zero
+  # You may wish to disable always updating cookbooks in CI or other testing environments.
+  # For example:
+  #   always_update_cookbooks: <%= !ENV['CI'] %>
+  always_update_cookbooks: true
+
+platforms:
+  - name: server
+    driver:
+      box: centos/7
+      hostname: nfs.server
+      network:
+        - ["private_network", {ip: "192.168.66.11"}]
+      customize:
+        createhd:
+          - filename: /tmp/disk1.vmdk
+            size: 1024
+        storageattach:
+          - storagectl: IDE
+            type: "hdd"
+            port: 0
+            device: 1
+            medium: /tmp/disk1.vmdk
+  - name: client
+    driver:
+      box: centos/7
+      hostname: nfs.client
+      network:
+        - ["private_network", {ip: "192.168.66.12"}]
+suites:
+  - name: server
+    run_list:
+      - recipe[nfs::test]
+      - recipe[nfs::server]
+    includes: ['server']
+  - name: client
+    run_list:
+      - recipe[nfs::client]
+    includes: ['client']
+    attributes: 
+      nfs:
+        client:
+          nfsserver: "192.168.66.11"

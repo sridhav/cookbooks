@@ -1,0 +1,11 @@
+#!/bin/sh
+
+hdd="<%= node["nfs"]["test"]["device"] %>"
+mount="<%= node["nfs"]["test"]["mount"] %>"
+echo "n
+p
+1
+
+
+w
+" | fdisk $hdd; mkfs.ext3 -L $mount "$hdd"1;
